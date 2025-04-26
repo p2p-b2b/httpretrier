@@ -81,6 +81,15 @@ func (s Strategy) String() string {
 	return string(s)
 }
 
+func (s Strategy) IsValid() bool {
+	switch s {
+	case FixedDelayStrategy, JitterBackoffStrategy, ExponentialBackoffStrategy:
+		return true
+	default:
+		return false
+	}
+}
+
 // Client is a custom HTTP client with configurable settings
 // and retry strategies
 type Client struct {
@@ -249,6 +258,21 @@ func (b *ClientBuilder) WithRetryStrategy(retryStrategy Strategy) *ClientBuilder
 	// Validate the strategy type itself
 	// Just set the type, Build will validate/default
 	b.client.retryStrategyType = retryStrategy
+	return b
+}
+
+// WithRetryStrategyAsString sets the retry strategy for the client
+// using a string representation of the strategy type
+// and returns the ClientBuilder for method chaining
+func (b *ClientBuilder) WithRetryStrategyAsString(retryStrategy string) *ClientBuilder {
+	strategy := Strategy(retryStrategy)
+	if !strategy.IsValid() {
+		slog.Warn("Invalid retry strategy type, using default (Exponential)", "invalidValue", retryStrategy, "defaultValue", ExponentialBackoffStrategy)
+		strategy = ExponentialBackoffStrategy
+	}
+
+	b.client.retryStrategyType = strategy
+
 	return b
 }
 

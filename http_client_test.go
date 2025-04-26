@@ -164,3 +164,57 @@ func TestClientError(t *testing.T) {
 	err := &ClientError{Message: "test error"}
 	assert.Equal(t, "test error", err.Error())
 }
+
+func TestClientBuilder_WithRetryStrategyAsString(t *testing.T) {
+	tests := []struct {
+		name          string
+		inputStrategy string
+		expectedType  Strategy
+		expectWarning bool // Although we can't directly test logs here, good to note
+	}{
+		{
+			name:          "Valid Fixed Strategy",
+			inputStrategy: "fixed",
+			expectedType:  FixedDelayStrategy,
+			expectWarning: false,
+		},
+		{
+			name:          "Valid Jitter Strategy",
+			inputStrategy: "jitter",
+			expectedType:  JitterBackoffStrategy,
+			expectWarning: false,
+		},
+		{
+			name:          "Valid Exponential Strategy",
+			inputStrategy: "exponential",
+			expectedType:  ExponentialBackoffStrategy,
+			expectWarning: false,
+		},
+		{
+			name:          "Invalid Strategy",
+			inputStrategy: "invalid-strategy",
+			expectedType:  ExponentialBackoffStrategy, // Should default
+			expectWarning: true,
+		},
+		{
+			name:          "Empty Strategy",
+			inputStrategy: "",
+			expectedType:  ExponentialBackoffStrategy, // Should default
+			expectWarning: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			builder := NewClientBuilder() // Start fresh for each test case
+			builder.WithRetryStrategyAsString(tt.inputStrategy)
+
+			// Assert that the correct strategy *type* was set on the internal client struct
+			assert.Equal(t, tt.expectedType, builder.client.retryStrategyType)
+
+			// Note: We expect a warning log for invalid strategies, but testing logs
+			// usually requires more setup (e.g., capturing log output).
+			// This test focuses on the functional outcome (correct strategy type set).
+		})
+	}
+}
