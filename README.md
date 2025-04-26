@@ -1,6 +1,7 @@
 # httpretrier
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/p2p-b2b/httpretrier.svg)](https://pkg.go.dev/github.com/p2p-b2b/httpretrier)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/p2p-b2b/httpretrier?style=plastic)
 
 `httpretrier` is a Go library that provides a convenient way to add automatic retry logic to your HTTP requests. It wraps the standard `http.Client` and `http.Transport` to handle transient server errors (5xx) or network issues by retrying requests based on configurable strategies.
 
